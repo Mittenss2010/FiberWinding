@@ -259,8 +259,10 @@ def CheckFiberWindingBreak(inImage):
                 app.frames[StartPage].Command_RunFlag.configure(text='拉丝断头')
                 app.frames[StartPage].Command_RunFlag.update()
                 # 0 追加到上方 END 追加到最后一行
-                app.frames[StartPage].List_Record.insert(0,"断头时间："+time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time())))
+                timeDtae = "断头时间："+time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(time.time()))
+                app.frames[StartPage].List_Record.insert(0,timeDtae)
                 app.frames[StartPage].List_Record.update()
+                #信息分类
                 hour = datetime.datetime.now().strftime('%H')
                 mintue = datetime.datetime.now().strftime('%M')
                 hourint = int(hour)
@@ -475,9 +477,9 @@ def detectingAlgorithm(grayFrame):
             with open('/home/pi/Desktop/chengwei.txt','a') as my_file:
                 strMessage = str(datetime.datetime.now()) +'检测到异常\n'
                 my_file.write(strMessage)
-            #strdate = str(datetime.datetime.now())
-            #path = '/home/pi/Desktop/images/'+strdate+'1.png'
-            #cv2.write(path,tempdatas.firstFrame.copy())
+            strdate = str(datetime.datetime.now())
+            path = '/home/pi/FiberWindingCheck/HistoryImage/' + strdate + '.png'
+            cv2.imwrite(path,tempdatas.firstFrame.copy())
             #path = '/home/pi/Desktop/images/'+strdate+'2.png'
             #cv2.write(path,grayFrame.copy())
             
@@ -553,7 +555,7 @@ class Application(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
         # 界面容器
         self.frames = {}
-        for F in (StartPage, PageTwo,PageFour):
+        for F in (StartPage, PageTwo, PageHistory, PageFour):
             frame = F(container, self)
             self.frames[F] = frame
             # 四个页面的位置都是 grid(row=0, column=0), 位置重叠，只有最上面的可见
@@ -1000,12 +1002,76 @@ class PageTwo(tk.Frame):
 
         self.style.configure('TCommand_BackMain.TButton', background='#00FFFF',font=('楷体',14,'bold'))
         self.Command_BackMain = Button(self, text='返回主界面', command=lambda: self.Command_BackMain_Cmd(root), style='TCommand_BackMain.TButton')
-        self.Command_BackMain.place(relx=0., rely=0.75, relwidth=0.991, relheight=0.235)
+        self.Command_BackMain.place(relx=0., rely=0.75, relwidth=0.45, relheight=0.235)
+
+#添加历史记录功能
+        self.style.configure('TCommand_goHestoryPage.TButton', background='#00FFFF',font=('楷体',14,'bold'))
+        self.Command_goHestoryPage = Button(self, text='断头历史图像', command=lambda: self.goHestoryPage_Cmd(root), style='TCommand_goHestoryPage.TButton')
+        self.Command_goHestoryPage.place(relx=0.5, rely=0.75, relwidth=0.45, relheight=0.235)
 
     def Command_BackMain_Cmd(self, root, event=None):
         #TODO, Please finish the function here!
         root.show_frame(StartPage)
+
+    def goHestoryPage_Cmd(self, root, event=None):
+    #TODO, Please finish the function here!
+        root.show_frame(PageHistory)
+        # 展示历史图像
 #********************************************************************************
+'''
+2018年4月20日 15:58:27
+功能：展示历史图像
+故障报警后保存当时的图片到本地，这里控制进行展示,延时显示
+'''
+#********************************************************************************
+class PageHistory(tk.Frame):
+    '''ShowHistory'''
+    #这个类仅实现界面生成功能，具体事件处理代码在子类Application中。
+    def __init__(self, parent, root):
+        super().__init__(parent)
+        self.createWidgets(root)
+
+    def createWidgets(self,root):
+        self.style = Style()
+        self.root = root
+        self.style.configure('TCommand_returnStartPage.TButton', font=('楷体',18,'bold'))  #???TCommand4
+        self.returnStartPage_Btn = Button(self, text='返回主界面', command=self.returnStartPage_Cmd, style='TCommand_returnStartPage.TButton')
+        self.returnStartPage_Btn.place(relx=0.75, rely=0.8, relwidth=0.231, relheight=0.185)
+
+        # self.style.configure('TCommand4.TButton', font=('楷体',18,'bold'))  #???TCommand4
+        # self.returnStartPage_Btn = Button(self, text='上一张', command=self.returnStartPage_Cmd, style='TCommand4.TButton')
+        # self.returnStartPage_Btn.place(relx=0.75, rely=0.8, relwidth=0.231, relheight=0.185)
+        
+        self.style.configure('TCommand_NextPic.TButton', font=('楷体',18,'bold'))  #???TCommand4
+        self.returnStartPage_Btn = Button(self, text='浏览图片', command=self.NextPic_Cmd, style='TCommand_NextPic.TButton')
+        self.returnStartPage_Btn.place(relx=0.5, rely=0.8, relwidth=0.231, relheight=0.185)
+
+        #text_label = Label(root, text='断头时间：'+)
+
+        global Pic_History
+        global CurrentPic
+        Pic_History = tk.PhotoImage(file=os.path.dirname(sys.path[0])+ "/HistoryImage/001.png")
+        self.style.configure('TLabel_Pic_History.TLabel', anchor='w', font=('宋体',9))
+        self.Label_Pic_History = Label(self, text='Pic_History', image=Pic_History, style='TLabel_Pic_History.TLabel')
+        self.Label_Pic_History.place(relx=0., rely=0.2, relwidth=1., relheight = 0.3)
+
+
+    def returnStartPage_Cmd(self, event=None):
+        '''返回主界面'''
+        self.root.show_frame(StartPage)
+        pass
+		
+    def NextPic_Cmd(self, event=None):
+        '''浏览图片'''
+        for filename in os.listdir("/home/pi/FiberWindingCheck/HistoryImage"):              #listdir的参数是文件夹的路径
+            print (filename)
+            Pic_History = tk.PhotoImage(file='/home/pi/FiberWindingCheck/HistoryImage' + '/' + filename)
+            self.style.configure('TLabel_Pic_History.TLabel', anchor='w', font=('宋体',9))
+            self.Label_Pic_History = Label(self, text='Pic_History', image=Pic_History, style='TLabel_Pic_History.TLabel')
+            self.Label_Pic_History.place(relx=0., rely=0.2, relwidth=1., relheight = 0.3)
+            self.Label_Pic_History.update()
+            time.sleep(5)
+        pass
 
 
 
@@ -1838,28 +1904,29 @@ if __name__ == '__main__':
     initGrayValues()
     isSetGuasi()
     InitParmeButton()
+	
     # SocketClient            启动Socket客户端
-    socketClient.socketConnect()
-    if  socketClient.isConnected == True:
-        ClientInfo = dict(strStoveName=settings.stoveName,iStatus= tempdatas.iStatus)
-        try:
-            socketClient.sendDateToService(ClientInfo,cmd_ClientInfo)
-        finally:
-            socketClient.socketClose()
+    # socketClient.socketConnect()
+    # if  socketClient.isConnected == True:
+        # ClientInfo = dict(strStoveName=settings.stoveName,iStatus= tempdatas.iStatus)
+        # try:
+            # socketClient.sendDateToService(ClientInfo,cmd_ClientInfo)
+        # finally:
+            # socketClient.socketClose()
     # 接收连接成功消息
     # 准备组包发送数据
     # SocketClient            启动Socket服务端
-    try:
-        socketS = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # 绑定IP地址以及端口号
-        socketS.bind((settings.nativeIPaddr, settings.nativePort))
-        # 设置最多几个排队请求
-        socketS.listen(10)
-        # 开始侦听
-        _thread.start_new_thread(listenClientConnect, (socketS,))
-        print('start server sussess!')
-    except:
-        print('start server error!')
+    # try:
+        # socketS = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # # 绑定IP地址以及端口号
+        # socketS.bind((settings.nativeIPaddr, settings.nativePort))
+        # # 设置最多几个排队请求
+        # socketS.listen(10)
+        # # 开始侦听
+        # _thread.start_new_thread(listenClientConnect, (socketS,))
+        # print('start server sussess!')
+    # except:
+        # print('start server error!')
 
     timer=threading.Timer(5,MonitorChannel) # 定时器开启
     timer.setDaemon(True)
