@@ -1016,6 +1016,8 @@ class PageTwo(tk.Frame):
     def goHestoryPage_Cmd(self, root, event=None):
     #TODO, Please finish the function here!
         root.show_frame(PageHistory)
+		#初始化参数
+		
         # 展示历史图像
 #********************************************************************************
 '''
@@ -1066,9 +1068,6 @@ class PageHistory(tk.Frame):
         for filename in os.listdir("/home/pi/FiberWindingCheck/HistoryImage"):              #listdir的参数是文件夹的路径
             print (filename)
             Pic_History = tk.PhotoImage(file='/home/pi/FiberWindingCheck/HistoryImage' + '/' + filename)
-            self.style.configure('TLabel_Pic_History.TLabel', anchor='w', font=('宋体',9))
-            self.Label_Pic_History = Label(self, text='Pic_History', image=Pic_History, style='TLabel_Pic_History.TLabel')
-            self.Label_Pic_History.place(relx=0., rely=0.2, relwidth=1., relheight = 0.3)
             self.Label_Pic_History.update()
             time.sleep(5)
         pass
@@ -1880,7 +1879,7 @@ def mycallback(chann):
 
 #RISING FALLING BOTH
 #GPIO.add_event_detect(channel,GPIO.RISING,bouncetime=300)
-GPIO.add_event_detect(channel,GPIO.FALLING,bouncetime=300)
+GPIO.add_event_detect(channel,GPIO.FALLING,bouncetime = 50)
 #GPIO.add_event_detect(channel,GPIO.BOTH,bouncetime=500)
 GPIO.add_event_callback(channel,mycallback)
 #********************************************************************************
