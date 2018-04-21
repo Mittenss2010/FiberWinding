@@ -41,10 +41,10 @@ class ImageProvider(threading.Thread):
     def __init__(self,*args, **kwargs):
         '''asdf'''
         super(ImageProvider, self).__init__(*args, **kwargs)
-        self.__flag = threading.Event()     # 用于暂停线程的标识
-        self.__flag.set()                   # 设置为True
-        self.__running = threading.Event()  # 用于停止线程的标识
-        self.__running.set()                # 将running设置为True
+        self.__flag = threading.Event()      # 用于暂停线程的标识
+        self.__flag.set()                    # 设置为True
+        self.__running = threading.Event()   # 用于停止线程的标识
+        self.__running.set()                 # 将running设置为True
 
     def run(self):
         with picamera.PiCamera() as camera:
@@ -478,8 +478,13 @@ def detectingAlgorithm(grayFrame):
                 strMessage = str(datetime.datetime.now()) +'检测到异常\n'
                 my_file.write(strMessage)
             strdate = str(datetime.datetime.now())
+
             path = '/home/pi/FiberWindingCheck/HistoryImage/' + strdate + '.png'
-            cv2.imwrite(path,tempdatas.firstFrame.copy())
+            path_resize = '/home/pi/FiberWindingCheck/HistoryImage_resize/' + strdate + '.png'
+            cv2.imwrite(path, tempdatas.firstFrame.copy())
+
+            res = cv2.resize(tempdatas.firstFrame.copy(),(800, 80),interpolation=cv2.INTER_CUBIC)
+            cv2.imwrite(path_resize, res)
             #path = '/home/pi/Desktop/images/'+strdate+'2.png'
             #cv2.write(path,grayFrame.copy())
             
@@ -617,7 +622,7 @@ class StartPage(tk.Frame):
         self.level5.place(relx=0.670, rely=0.05, relwidth=0.160, relheight=0.85)
         #level6
         self.style.configure('level6.TButton',background='green',font=('楷体',16,'bold'))
-        self.level6 = Button(self.Frame_CheckParameters, text='6', command=self.level6_cmd, style='level6.TButton')
+        self.level6 = Button(self.Frame_CheckParameters, text='Test', command=self.level6_cmd, style='level6.TButton')
         self.level6.place(relx=0.830, rely=0.05, relwidth=0.160, relheight=0.85)
         #*****************************************************************************
         self.style.configure('TCommand_DebugItem.TButton', font=('楷体',18,'bold'))
@@ -876,8 +881,8 @@ class StartPage(tk.Frame):
 
     def level6_cmd(self, event=None):
         '''灵敏度——6'''
-        settings.threshold = 90
-        settings.areaSet = 200
+        settings.threshold = 55
+        settings.areaSet = 60
         settings.errorNumber = 3
         settings.errorTimes = 2
         levelReset()
@@ -1048,15 +1053,15 @@ class PageHistory(tk.Frame):
         self.returnStartPage_Btn = Button(self, text='浏览图片', command=self.NextPic_Cmd, style='TCommand_NextPic.TButton')
         self.returnStartPage_Btn.place(relx=0.5, rely=0.8, relwidth=0.231, relheight=0.185)
 
-        #text_label = Label(root, text='断头时间：'+)
+        self.style.configure('TLabel_txt_History.TLabel', anchor='w', font=('楷体',18,'bold'))
+        self.time_label = Label(self, text='断头时间：', style='TLabel_txt_History.TLabel')
+        self.time_label.place(relx=0., rely=0.05, relwidth=1., relheight = 0.2)
 
-        global Pic_History
-        global CurrentPic
-        Pic_History = tk.PhotoImage(file=os.path.dirname(sys.path[0])+ "/HistoryImage/001.png")
-        self.style.configure('TLabel_Pic_History.TLabel', anchor='w', font=('宋体',9))
-        self.Label_Pic_History = Label(self, text='Pic_History', image=Pic_History, style='TLabel_Pic_History.TLabel')
-        self.Label_Pic_History.place(relx=0., rely=0.2, relwidth=1., relheight = 0.3)
-
+        #global Pic_History
+        self.Pic_History = tk.PhotoImage(file=os.path.dirname(sys.path[0])+ "/HistoryImage/001.png")
+        self.style.configure('TLabel_Pic_History.TLabel', anchor='w', font=('楷体',18,'bold'))
+        self.Label_Pic_History = Label(self, text='Pic_History', image = self.Pic_History, style='TLabel_Pic_History.TLabel')
+        self.Label_Pic_History.place(relx=0., rely=0.3, relwidth=1., relheight = 0.3)
 
     def returnStartPage_Cmd(self, event=None):
         '''返回主界面'''
@@ -1065,12 +1070,16 @@ class PageHistory(tk.Frame):
 		
     def NextPic_Cmd(self, event=None):
         '''浏览图片'''
-        for filename in os.listdir("/home/pi/FiberWindingCheck/HistoryImage"):              #listdir的参数是文件夹的路径
+        for filename in os.listdir("/home/pi/FiberWindingCheck/HistoryImage_resize"):                   #listdir的参数是文件夹的路径
             print (filename)
-            Pic_History = tk.PhotoImage(file='/home/pi/FiberWindingCheck/HistoryImage' + '/' + filename)
-            self.style.configure('TLabel_Pic_History.TLabel', anchor='w', font=('宋体',9))
-            self.Label_Pic_History = Label(self, text='Pic_History', image=Pic_History, style='TLabel_Pic_History.TLabel')
-            self.Label_Pic_History.place(relx=0., rely=0.2, relwidth=1., relheight = 0.3)
+            self.style.configure('TLabel_txt_History.TLabel', anchor='w', font=('楷体',18,'bold'))
+            self.time_label = Label(self, text='断头时间：'+ filename[0:(len(filename)-11)], style= 'TLabel_txt_History.TLabel')
+            self.time_label.place(relx=0., rely=0.05, relwidth=1., relheight = 0.2)
+
+            self.Pic_History = tk.PhotoImage( file='/home/pi/FiberWindingCheck/HistoryImage_resize' + '/' + filename)
+            self.style.configure('TLabel_Pic_History.TLabel', anchor='w', font=('楷体',18,'bold'))
+            self.Label_Pic_History = Label(self, text='Pic_History', image = self.Pic_History, style='TLabel_Pic_History.TLabel')
+            self.Label_Pic_History.place(relx=0., rely=0.3, relwidth=1., relheight = 0.3)
             self.Label_Pic_History.update()
             time.sleep(5)
         pass
