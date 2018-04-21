@@ -1068,6 +1068,9 @@ class PageHistory(tk.Frame):
         for filename in os.listdir("/home/pi/FiberWindingCheck/HistoryImage"):              #listdir的参数是文件夹的路径
             print (filename)
             Pic_History = tk.PhotoImage(file='/home/pi/FiberWindingCheck/HistoryImage' + '/' + filename)
+            self.style.configure('TLabel_Pic_History.TLabel', anchor='w', font=('宋体',9))
+            self.Label_Pic_History = Label(self, text='Pic_History', image=Pic_History, style='TLabel_Pic_History.TLabel')
+            self.Label_Pic_History.place(relx=0., rely=0.2, relwidth=1., relheight = 0.3)
             self.Label_Pic_History.update()
             time.sleep(5)
         pass
