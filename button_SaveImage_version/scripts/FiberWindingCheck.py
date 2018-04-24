@@ -153,18 +153,21 @@ def CheckFiberWindingBreak(inImage):
             tempdatas.index=tempdatas.index + 1
             #开始学习
             if tempdatas.index >=20:
-                tempdatas.avgValues[0] = np.mean(inImage[:,settings.boardPoints_left:settings.boardPoints_left+tempdatas.interval]) + tempdatas.avgValues[0]
-                tempdatas.avgValues[1] = np.mean(inImage[:,settings.boardPoints_left+tempdatas.interval:settings.boardPoints_left+2*tempdatas.interval]) + tempdatas.avgValues[1]
-                tempdatas.avgValues[2] = np.mean(inImage[:,settings.boardPoints_left+2*tempdatas.interval:settings.boardPoints_left+3*tempdatas.interval]) + tempdatas.avgValues[2]
-                tempdatas.avgValues[3] = np.mean(inImage[:,settings.boardPoints_left+3*tempdatas.interval:settings.boardPoints_left+4*tempdatas.interval]) + tempdatas.avgValues[3]
-                tempdatas.avgValues[4] = np.mean(inImage[:,settings.boardPoints_left+4*tempdatas.interval:settings.boardPoints_left+5*tempdatas.interval]) + tempdatas.avgValues[4]
-                tempdatas.avgValues[5] = np.mean(inImage[:,settings.boardPoints_left+5*tempdatas.interval:settings.boardPoints_left+6*tempdatas.interval]) + tempdatas.avgValues[5]
+                # init some value
+                nDigits = 4                                         #round 精度
+                tempdatas.avgValues[0] = round(np.mean(inImage[:,settings.boardPoints_left:settings.boardPoints_left+tempdatas.interval]) + tempdatas.avgValues[0], nDigits)
+                tempdatas.avgValues[1] = round(np.mean(inImage[:,settings.boardPoints_left+tempdatas.interval:settings.boardPoints_left+2*tempdatas.interval]) + tempdatas.avgValues[1], nDigits)
+                tempdatas.avgValues[2] = round(np.mean(inImage[:,settings.boardPoints_left+2*tempdatas.interval:settings.boardPoints_left+3*tempdatas.interval]) + tempdatas.avgValues[2], nDigits)
+                tempdatas.avgValues[3] = round(np.mean(inImage[:,settings.boardPoints_left+3*tempdatas.interval:settings.boardPoints_left+4*tempdatas.interval]) + tempdatas.avgValues[3], nDigits)
+                tempdatas.avgValues[4] = round(np.mean(inImage[:,settings.boardPoints_left+4*tempdatas.interval:settings.boardPoints_left+5*tempdatas.interval]) + tempdatas.avgValues[4], nDigits)
+                tempdatas.avgValues[5] = round(np.mean(inImage[:,settings.boardPoints_left+5*tempdatas.interval:settings.boardPoints_left+6*tempdatas.interval]) + tempdatas.avgValues[5], nDigits)
                 style = Style()
                 style.configure('TCommand_RunFlag.TButton', font=('楷体',18,'bold'))
                 app.frames[StartPage].Command_RunFlag.configure(style = 'TCommand_RunFlag.TButton')
                 app.frames[StartPage].Command_RunFlag.configure(text='模型建立: ' +str((tempdatas.index-19)/settings.learningIter*100)+'%')
                 app.frames[StartPage].Command_RunFlag.update()
                 print('start learning '+ str(tempdatas.index))
+                #条件整理
             if tempdatas.index == 19 + settings.learningIter:
                 tempdatas.spiltPerValues[0]=tempdatas.avgValues[0]/settings.learningIter
                 tempdatas.spiltPerValues[1]=tempdatas.avgValues[1]/settings.learningIter
@@ -174,6 +177,7 @@ def CheckFiberWindingBreak(inImage):
                 tempdatas.spiltPerValues[5]=tempdatas.avgValues[5]/settings.learningIter
                 tempdatas.firstFrame = inImage.copy()# 将最新采集的图像给为前一帧图像
             if tempdatas.index>=20 + settings.learningIter:
+                print("学习完毕，输出每块的均值")
                 print(tempdatas.spiltPerValues)
                 # 学习完毕
                 settings.grayAvgValue = tempdatas.spiltPerValues
@@ -337,20 +341,21 @@ def CheckFiberWindingBreak(inImage):
 
 # 计算和比较图像的灰度均值 四块 0 1 2 3 用一个元组保存
 def caculatePerValues(grayFrameTemp):
-    avg_1 = 0
-    avg_2 = 0
-    avg_3 = 0
-    avg_4 = 0
-    avg_5 = 0
-    avg_6 = 0
+    # init some value
+    avg_1 = avg_2 = avg_3 = avg_4 = avg_5 = avg_6 = 0
     interval = tempdatas.interval
+    nDigits = 4                                         #round 精度
     #计算图像的平均灰度
-    avg_1 = np.mean(grayFrameTemp[:,settings.boardPoints_left:settings.boardPoints_left+interval]) + avg_1
-    avg_2 = np.mean(grayFrameTemp[:,settings.boardPoints_left+interval:settings.boardPoints_left+2*interval]) + avg_2
-    avg_3 = np.mean(grayFrameTemp[:,settings.boardPoints_left+2*interval:settings.boardPoints_left+3*interval]) + avg_3
-    avg_4 = np.mean(grayFrameTemp[:,settings.boardPoints_left+3*interval:settings.boardPoints_left+4*interval]) + avg_4
-    avg_5 = np.mean(grayFrameTemp[:,settings.boardPoints_left+4*interval:settings.boardPoints_left+5*interval]) + avg_5
-    avg_6 = np.mean(grayFrameTemp[:,settings.boardPoints_left+5*interval:settings.boardPoints_left+6*interval]) + avg_6
+    # 灰度图像区域：【y方向: 0~end，x方向：0~0+间隔】
+    # 区域求均值
+    # 截取小数点后4位，耗时能否改变?
+    avg_1 = round(np.mean(grayFrameTemp[:,settings.boardPoints_left:settings.boardPoints_left+interval]) + avg_1, nDigits)
+    avg_2 = round(np.mean(grayFrameTemp[:,settings.boardPoints_left+interval:settings.boardPoints_left+2*interval]) + avg_2, nDigits)
+    avg_3 = round(np.mean(grayFrameTemp[:,settings.boardPoints_left+2*interval:settings.boardPoints_left+3*interval]) + avg_3, nDigits)
+    avg_4 = round(np.mean(grayFrameTemp[:,settings.boardPoints_left+3*interval:settings.boardPoints_left+4*interval]) + avg_4, nDigits)
+    avg_5 = round(np.mean(grayFrameTemp[:,settings.boardPoints_left+4*interval:settings.boardPoints_left+5*interval]) + avg_5, nDigits)
+    avg_6 = round(np.mean(grayFrameTemp[:,settings.boardPoints_left+5*interval:settings.boardPoints_left+6*interval]) + avg_6, nDigits)
+
     avgValues = [avg_1,avg_2,avg_3,avg_4,avg_5,avg_6]
     tempdatas.avgValues = avgValues
     print(avgValues)
@@ -1776,7 +1781,7 @@ def isSetGuasi():
     style =  Style()
     if settings.guasi != "0":
         listguasi = settings.guasi.split(",")
-        listguasi.pop()#
+        listguasi.pop() #
         for i in range(int(len(listguasi)/2)):
             index = i*2
             print(listguasi[index])
@@ -1810,13 +1815,17 @@ def initGrayValues():
         listd = listc.split("]")
         liste = listd[0]
         listf = liste.split(",")
-        listg = [0,0,0,0,0,0]
+        list_PerValues = [0,0,0,0,0,0]
         for i in range(int(len(listf))):
-            listg[i] = float(listf[i])
-            settings.spiltPerValues = listg
-            tempdatas.spiltPerValues = listg
-            print(settings.spiltPerValues)
-        #print(listg)
+            list_PerValues[i] = round(float(listf[i]), 4)
+            print("listg ["+ i +"] = " + str(list_PerValues[i]))
+        settings.spiltPerValues = list_PerValues
+        tempdatas.spiltPerValues = list_PerValues
+        print("tempdatas.spiltPerValues = ")
+        print(settings.spiltPerValues)
+        print("tempdatas.spiltPerValues = ")
+        print(settings.spiltPerValues)
+        #print(list_PerValues)
 
 
 
@@ -1835,6 +1844,7 @@ def testTcp():
 
 
 #********************************************************************************
+# 状态列表
 iStatus_start = 0
 iStatus_learning = 1
 iStatus_recongnize = 2
