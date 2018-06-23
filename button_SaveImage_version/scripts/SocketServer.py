@@ -52,8 +52,8 @@ class SocketServer(object):
 
     def start(self):
         '''socket 连接'''
-        self.SocketServer.bind((self.ipaddr,self.port))
-        self.SocketServer.listen(10)
+        self.SocketServer.bind((self.ipaddr,self.port))               # 绑定连接信息
+        self.SocketServer.listen(10)                                  # 监听
         while True:
             conn,addr = self.SocketServer.accept()
             try:

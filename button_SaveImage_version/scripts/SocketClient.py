@@ -12,21 +12,21 @@ class SocketClient(object):
     '''Socket--客户端'''
     def __init__(self,ipaddr,port):
         '''初始化'''
-        self.socketClient = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        #self.socketClient.settimeout(3)
-        self.ipaddr = ipaddr
-        self.port = port
-        self.isConnected = False
+        self.socketClient = socket.socket(socket.AF_INET,socket.SOCK_STREAM)       # socket 对象
+        #self.socketClient.settimeout(3) 
+        self.ipaddr = ipaddr                                                       # ip地址                        
+        self.port = port                                                           # 端口  
+        self.isConnected = False                                                   # 是否连接  
     
 
     def socketConnect(self):
         '''Socekt--连接服务器--返回连接状态'''
         try:
-            self.socketClient.connect((self.ipaddr,self.port))
-            self.isConnected = True
-            print('连接服务器成功！',self.ipaddr)
+            self.socketClient.connect((self.ipaddr,self.port))                    # 建立连接
+            self.isConnected = True                                               # 状态标记
+            print('连接服务器成功！',self.ipaddr)                                   # 输出
             #_thread.start_new_thread(ReceiveData,(self.socketClient,))
-        except:
+        except:                                                                   # 异常输出
             self.isConnected = False
             print('连接服务器失败！',self.ipaddr,self.port)
     
